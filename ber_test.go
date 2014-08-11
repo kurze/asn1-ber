@@ -1,6 +1,10 @@
 package ber
 
-import "testing"
+import (
+	"bytes"
+	"io"
+	"testing"
+)
 
 func TestEncodeDecodeInterger(t *testing.T) {
 	// Pre
@@ -87,4 +91,78 @@ func TestString(t *testing.T) {
 	}
 
 	// Post
+}
+
+func TestSequenceAndAppendChild(t *testing.T) {
+	// Pre
+	var v1, v2, v3 string
+	v1 = "HIC SVNT LEONES"
+	v2 = "HIC SVNT DRACONES"
+	v3 = "Terra Incognita"
+
+	// Test
+	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v1, "String")
+	p2 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v2, "String")
+	p3 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v3, "String")
+
+	sequence := NewSequence("a sequence")
+	sequence.AppendChild(p1)
+	sequence.AppendChild(p2)
+	sequence.AppendChild(p3)
+
+	if len(sequence.Children) != 3 {
+		t.Error("wrong length for children array should be three =>", len(sequence.Children))
+	}
+
+	encodedSequence := sequence.Bytes()
+
+	decodedSequence := DecodePacket(encodedSequence)
+	if len(decodedSequence.Children) != 3 {
+		t.Error("wrong length for children array should be three =>", len(decodedSequence.Children))
+	}
+
+	// Post
+}
+
+func TestPrint(t *testing.T) {
+	// Pre
+	var v1 string = "Answer to the Ultimate Question of Life, the Universe, and Everything"
+	var v2 uint64 = 42
+	var v3 bool = true
+	// Test
+	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v1, "Question")
+	p2 := NewInteger(ClassUniversal, TypePrimitive, TagInteger, v2, "Answer")
+	p3 := NewBoolean(ClassUniversal, TypePrimitive, TagBoolean, v3, "Validity")
+
+	sequence := NewSequence("a sequence")
+	sequence.AppendChild(p1)
+	sequence.AppendChild(p2)
+	sequence.AppendChild(p3)
+
+	PrintPacket(sequence)
+
+	encodedSequence := sequence.Bytes()
+	PrintBytes(encodedSequence, "\t")
+
+	// Post
+}
+
+func TestReadPacket(t *testing.T) {
+	// Pre
+	var value string = "Ad impossibilia nemo tenetur"
+	packet := NewString(ClassUniversal, TypePrimitive, TagOctetString, value, "string")
+	var buffer io.ReadWriter
+	buffer = new(bytes.Buffer)
+
+	// Test
+	buffer.Write(packet.Bytes())
+
+	newPacket, err := ReadPacket(buffer)
+	if err != nil {
+		t.Error("error during ReadPacket", err)
+	}
+
+	if !bytes.Equal(newPacket.ByteValue, packet.ByteValue) {
+		t.Error("packets should be the same")
+	}
 }

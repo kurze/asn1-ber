@@ -7,10 +7,8 @@ import (
 )
 
 func TestEncodeDecodeInterger(t *testing.T) {
-	// Pre
 	var integer uint64 = 10
 
-	// Test
 	encodedInteger := EncodeInteger(integer)
 	decodedInteger := DecodeInteger(encodedInteger)
 
@@ -18,14 +16,11 @@ func TestEncodeDecodeInterger(t *testing.T) {
 		t.Error("wrong should be equal", integer, decodedInteger)
 	}
 
-	// Post
 }
 
 func TestBoolean(t *testing.T) {
-	// Pre
 	var value bool = true
 
-	// Test
 	packet := NewBoolean(ClassUniversal, TypePrimitive, TagBoolean, value, "first Packet, True")
 
 	newBoolean, ok := packet.Value.(bool)
@@ -42,14 +37,11 @@ func TestBoolean(t *testing.T) {
 		t.Error("error during decoding packet")
 	}
 
-	// Post
 }
 
 func TestInteger(t *testing.T) {
-	// Pre
 	var value uint64 = 10
 
-	// Test
 	packet := NewInteger(ClassUniversal, TypePrimitive, TagInteger, value, "Integer, 10")
 
 	newInteger, ok := packet.Value.(uint64)
@@ -66,14 +58,11 @@ func TestInteger(t *testing.T) {
 		t.Error("error during decoding packet")
 	}
 
-	// Post
 }
 
 func TestString(t *testing.T) {
-	// Pre
 	var value string = "Hic sunt dracones"
 
-	// Test
 	packet := NewString(ClassUniversal, TypePrimitive, TagOctetString, value, "String")
 
 	newValue, ok := packet.Value.(string)
@@ -90,20 +79,13 @@ func TestString(t *testing.T) {
 		t.Error("error during decoding packet")
 	}
 
-	// Post
 }
 
 func TestSequenceAndAppendChild(t *testing.T) {
-	// Pre
-	var v1, v2, v3 string
-	v1 = "HIC SVNT LEONES"
-	v2 = "HIC SVNT DRACONES"
-	v3 = "Terra Incognita"
 
-	// Test
-	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v1, "String")
-	p2 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v2, "String")
-	p3 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v3, "String")
+	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, "HIC SVNT LEONES", "String")
+	p2 := NewString(ClassUniversal, TypePrimitive, TagOctetString, "HIC SVNT DRACONES", "String")
+	p3 := NewString(ClassUniversal, TypePrimitive, TagOctetString, "Terra Incognita", "String")
 
 	sequence := NewSequence("a sequence")
 	sequence.AppendChild(p1)
@@ -121,18 +103,12 @@ func TestSequenceAndAppendChild(t *testing.T) {
 		t.Error("wrong length for children array should be three =>", len(decodedSequence.Children))
 	}
 
-	// Post
 }
 
 func TestPrint(t *testing.T) {
-	// Pre
-	var v1 string = "Answer to the Ultimate Question of Life, the Universe, and Everything"
-	var v2 uint64 = 42
-	var v3 bool = true
-	// Test
-	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, v1, "Question")
-	p2 := NewInteger(ClassUniversal, TypePrimitive, TagInteger, v2, "Answer")
-	p3 := NewBoolean(ClassUniversal, TypePrimitive, TagBoolean, v3, "Validity")
+	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, "Answer to the Ultimate Question of Life, the Universe, and Everything", "Question")
+	p2 := NewInteger(ClassUniversal, TypePrimitive, TagInteger, 42, "Answer")
+	p3 := NewBoolean(ClassUniversal, TypePrimitive, TagBoolean, true, "Validity")
 
 	sequence := NewSequence("a sequence")
 	sequence.AppendChild(p1)
@@ -143,18 +119,13 @@ func TestPrint(t *testing.T) {
 
 	encodedSequence := sequence.Bytes()
 	PrintBytes(encodedSequence, "\t")
-
-	// Post
 }
 
 func TestReadPacket(t *testing.T) {
-	// Pre
-	var value string = "Ad impossibilia nemo tenetur"
-	packet := NewString(ClassUniversal, TypePrimitive, TagOctetString, value, "string")
+	packet := NewString(ClassUniversal, TypePrimitive, TagOctetString, "Ad impossibilia nemo tenetur", "string")
 	var buffer io.ReadWriter
 	buffer = new(bytes.Buffer)
 
-	// Test
 	buffer.Write(packet.Bytes())
 
 	newPacket, err := ReadPacket(buffer)

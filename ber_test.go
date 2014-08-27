@@ -2,6 +2,7 @@ package ber
 
 import (
 	"bytes"
+
 	"io"
 	"testing"
 )
@@ -64,7 +65,6 @@ func TestInteger(t *testing.T) {
 	if !ok || newInteger != value {
 		t.Error("error during decoding packet")
 	}
-
 }
 
 func TestString(t *testing.T) {
@@ -112,22 +112,6 @@ func TestSequenceAndAppendChild(t *testing.T) {
 
 }
 
-func TestPrint(t *testing.T) {
-	p1 := NewString(ClassUniversal, TypePrimitive, TagOctetString, "Answer to the Ultimate Question of Life, the Universe, and Everything", "Question")
-	p2 := NewInteger(ClassUniversal, TypePrimitive, TagInteger, 42, "Answer")
-	p3 := NewBoolean(ClassUniversal, TypePrimitive, TagBoolean, true, "Validity")
-
-	sequence := NewSequence("a sequence")
-	sequence.AppendChild(p1)
-	sequence.AppendChild(p2)
-	sequence.AppendChild(p3)
-
-	PrintPacket(sequence)
-
-	encodedSequence := sequence.Bytes()
-	PrintBytes(encodedSequence, "\t")
-}
-
 func TestReadPacket(t *testing.T) {
 	packet := NewString(ClassUniversal, TypePrimitive, TagOctetString, "Ad impossibilia nemo tenetur", "string")
 	var buffer io.ReadWriter
@@ -139,7 +123,7 @@ func TestReadPacket(t *testing.T) {
 	if err != nil {
 		t.Error("error during ReadPacket", err)
 	}
-
+	newPacket.ByteValue = nil
 	if !bytes.Equal(newPacket.ByteValue, packet.ByteValue) {
 		t.Error("packets should be the same")
 	}
@@ -169,3 +153,10 @@ func TestBinaryInteger(t *testing.T) {
 
 }
 
+func TestBinaryOctetString(t *testing.T) {
+	// data src : http://luca.ntop.org/Teaching/Appunti/asn1.html 5.10
+
+	if !bytes.Equal([]byte{0x04, 0x08, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}, NewString(ClassUniversal, TypePrimitive, TagOctetString, "\x01\x23\x45\x67\x89\xab\xcd\xef", "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+}

@@ -6,16 +6,23 @@ import (
 	"testing"
 )
 
-func TestEncodeDecodeInterger(t *testing.T) {
-	var integer uint64 = 10
+func TestEncodeDecodeInteger(t *testing.T) {
+	encodeDecodeInteger(t, 0)
+	encodeDecodeInteger(t, 10)
+	encodeDecodeInteger(t, 128)
+	encodeDecodeInteger(t, 1024)
+	encodeDecodeInteger(t, -1)
+	encodeDecodeInteger(t, -100)
+	encodeDecodeInteger(t, -1024)
+}
 
-	encodedInteger := EncodeInteger(integer)
-	decodedInteger := DecodeInteger(encodedInteger)
+func encodeDecodeInteger(t *testing.T, value int64) {
+	encodedInteger := EncodeSignedInteger(value)
+	decodedInteger := int64(DecodeInteger(encodedInteger))
 
-	if integer != decodedInteger {
-		t.Error("wrong should be equal", integer, decodedInteger)
+	if value != int64(decodedInteger) {
+		t.Error("wrong should be equal", value, decodedInteger)
 	}
-
 }
 
 func TestBoolean(t *testing.T) {
@@ -137,3 +144,28 @@ func TestReadPacket(t *testing.T) {
 		t.Error("packets should be the same")
 	}
 }
+
+func TestBinaryInteger(t *testing.T) {
+	// data src : http://luca.ntop.org/Teaching/Appunti/asn1.html 5.7
+
+	if !bytes.Equal([]byte{0x02, 0x01, 0x00}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, 0, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+	if !bytes.Equal([]byte{0x02, 0x01, 0x7F}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, 127, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+	if !bytes.Equal([]byte{0x02, 0x02, 0x00, 0x80}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, 128, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+	if !bytes.Equal([]byte{0x02, 0x02, 0x01, 0x00}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, 256, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+	if !bytes.Equal([]byte{0x02, 0x01, 0x80}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, -128, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+	if !bytes.Equal([]byte{0x02, 0x01, 0xFF, 0x7F}, NewSignedInteger(ClassUniversal, TypePrimitive, TagInteger, -129, "").Bytes()) {
+		t.Error("wrong binary generated")
+	}
+
+}
+
